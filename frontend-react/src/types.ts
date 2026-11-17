@@ -3,8 +3,9 @@ export type CourseProgress = {
   title: string;
   completionPercentage: number;
   lastActivityAt: string;
-  status: string;
-  isStale?: boolean;
+  status: 'in_progress';
+  isStale: boolean;
+  isQuickWin: boolean;
 };
 
 export type LearnerProgressResponse = {

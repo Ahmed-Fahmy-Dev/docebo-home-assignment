@@ -22,7 +22,7 @@ export function createApp() {
   app.use(cors());
   app.use(express.json());
 
-  // Authenticate user
+  // Populate the fictional identity stub; this does not authenticate the caller.
   app.use((req: Request, _res: Response, next: NextFunction) => {
     const header = req.header('x-authenticated-learner-id');
     if (header !== undefined) {

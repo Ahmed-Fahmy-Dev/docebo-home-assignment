@@ -25,8 +25,10 @@ export interface CourseProgress {
   completionPercentage: number;
   lastActivityAt: string;
   status: 'in_progress';
-  /** Set when last activity is older than the stale threshold (see progressService). */
-  isStale?: boolean;
+  /** True when last activity is more than 30 elapsed days ago. */
+  isStale: boolean;
+  /** True when exactly one lesson remains unfinished. No duration is implied. */
+  isQuickWin: boolean;
 }
 
 export interface LearnerProgressResponse {

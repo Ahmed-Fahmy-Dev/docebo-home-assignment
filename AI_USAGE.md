@@ -13,11 +13,20 @@ OpenAI Codex in the VS Code workspace.
 | Security review | Inspected repository files, dependency sources, install scripts, and published dependency advisories without installing packages or running application code. | Requested the audit before setup and asked for a concise risk assessment. |
 | Requirements and planning | Read the assignment documentation and summarized the scope, required deliverables, and constraints. Recommended a single repository for both applications. | Directed a plan-and-review workflow and selected one root repository. |
 | Repository setup | Initialized Git on `main`, configured the supplied GitHub remote, and consolidated the application ignore rules into a root `.gitignore`, also excluding `.DS_Store`. Added a Git trust entry for this exact project directory to resolve a Windows sandbox ownership conflict. | Created the GitHub repository and explicitly authorized local repository initialization and ignore-file migration. |
-| Documentation | Updated this record and the repository assumptions in `PRODUCT.md`. | Requested relevant documentation updates after each action; reviews and approves changes before implementation. |
+| Backend planning | Reviewed all backend source, helpers, comments, and original tests. Proposed extra rules and refined the plan to use existing seed fields. | Rejected time estimates without supporting duration data and selected a minimum-completion filter plus quick-win flags. Approved the final plan before implementation. |
+| Backend implementation | Completed progress filtering, mapping, stale flags, sorting, input validation, both extra rules, the frontend response type, and the compiled startup path. | Authorized implementation of the reviewed plan; code walkthrough and final candidate review remain pending. |
+| Backend verification | Established the original test baseline (four passing, four failing). After review, reduced the expanded suite from 62 to 23 tests: the original eight unchanged plus 15 focused additions. All 23 tests and the TypeScript build pass. Previously verified compiled startup with real HTTP requests and stopped the smoke-test server afterward. | Challenged excessive test scope and requested focused coverage of the extra rules and important boundaries. |
+| Frontend compatibility check | Type-checked the aligned response type; the check reports an existing unused `StrictMode` import in unchanged `frontend-react/src/main.tsx`. Left it for the frontend implementation step. | Approved response-type alignment as part of the backend plan; broader frontend changes remain pending. |
+| Documentation | Updated this record, the backend API README, and the backend rules and assumptions in `PRODUCT.md`. | Requested relevant documentation updates after each action; reviews and approves changes before implementation. |
+| Version control | Prepared the reviewed backend changes and validation summary for a feature commit and push to `main`. | Explicitly requested a meaningful commit message and a GitHub push. |
 
 ## What you rejected or rewrote
 
-Requested a shorter, actionable security assessment after the initial report was too long. No AI-generated application implementation has been accepted, rejected, or rewritten yet; specific examples will be recorded as development proceeds.
+- Requested a shorter, actionable security assessment after the initial report was too long.
+- Rejected AI's proposal to estimate remaining minutes because the seed data has no lesson-duration information. Chose features grounded in the existing completed-lesson data instead: minimum-completion filtering and quick-win flags.
+- Challenged AI's options object for a single `minCompletion` argument; requested a primitive number and deferred extensibility until needed.
+- Challenged AI changing `parseLearnerId` from `string | string[]` to `unknown` and using dense validation. Requested the original union type and clearer guards; retained decimal-format and safe-integer checks.
+- Challenged the oversized 62-case test suite. Requested removal of repetitive input variants and unchanged-infrastructure tests; retained 23 tests covering the original contract, extra rules, and key boundaries.
 
 ## What you'd do differently without AI
 
@@ -25,4 +34,4 @@ Manually reviewing the full dependency trees and cross-checking published adviso
 
 ## Ownership statement
 
-Pending the candidate's own statement after implementation and review. No application implementation has been changed by Codex at this stage.
+Pending the candidate's own statement after reviewing and explaining the implemented backend. AI-generated code and tests have been executed for verification; this does not substitute for the candidate's understanding or interview preparation.

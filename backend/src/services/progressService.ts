@@ -2,34 +2,32 @@ import { enrollments, knownLearnerIds } from '../data/seed';
 import { NotFoundError } from '../errors';
 import type { CourseEnrollment, CourseProgress } from '../types';
 
-/** Days without activity before a course is considered stale (business rule hint). */
+/** A course becomes stale after more than this many elapsed days without activity. */
 export const STALE_DAYS = 30;
 
 /**
  * Return in-progress courses for a learner, sorted by last activity (most recent first).
- *
- * TODO — implement this function to pass `tests/progress.api.test.ts`:
- * - Return 404 via NotFoundError when the learner does not exist in seed data
- * - Include only enrollments with status `in_progress` (exclude completed / not_started)
- * - Compute completionPercentage from completed lessons / total lessons (0–100, rounded)
- * - Map lastActivityAt through to the response
- * - Set isStale: true when last activity is older than STALE_DAYS
- * - Sort by lastActivityAt descending
- *
- * Helper functions below are provided — use, extend, or replace them.
+ * An optional minimum applies to the rounded completion percentage shown to the learner.
+ * Unknown learners fail before filtering; known learners may have no matching courses.
  */
-export function getInProgressCourses(learnerId: number): CourseProgress[] {
+export function getInProgressCourses(
+  learnerId: number,
+  minCompletion = 0,
+): CourseProgress[] {
   if (!knownLearnerIds.has(learnerId)) {
     throw new NotFoundError(`Learner ${learnerId} not found`);
   }
 
-  // Baseline stub: returns all enrollments for the learner without filtering or
-  // proper mapping. Replace with your implementation.
+  const now = new Date();
+
   return enrollments
-    .filter((enrollment) => enrollment.learnerId === learnerId)
-    .map(toCourseProgressStub);
+    .filter((enrollment) => enrollment.learnerId === learnerId && enrollment.status === 'in_progress')
+    .map((enrollment) => toCourseProgress(enrollment, now))
+    .filter((course) => course.completionPercentage >= minCompletion)
+    .sort((a, b) => Date.parse(b.lastActivityAt) - Date.parse(a.lastActivityAt));
 }
 
+/** Lessons are equally weighted; a course with no lessons has zero completion. */
 export function computeCompletionPercentage(enrollment: CourseEnrollment): number {
   if (enrollment.lessons.length === 0) {
     return 0;
@@ -38,6 +36,7 @@ export function computeCompletionPercentage(enrollment: CourseEnrollment): numbe
   return Math.round((completed / enrollment.lessons.length) * 100);
 }
 
+/** Exactly 30 days old is still fresh. Seed timestamps are valid ISO-8601 strings. */
 export function isEnrollmentStale(lastActivityAt: string, now: Date = new Date()): boolean {
   const lastActivity = new Date(lastActivityAt);
   const diffMs = now.getTime() - lastActivity.getTime();
@@ -45,13 +44,21 @@ export function isEnrollmentStale(lastActivityAt: string, now: Date = new Date()
   return diffDays > STALE_DAYS;
 }
 
-/** Temporary mapper — intentionally incomplete (wrong status, no stale flag). */
-function toCourseProgressStub(enrollment: CourseEnrollment): CourseProgress {
+/** A quick win has exactly one unfinished lesson; this does not imply a duration. */
+export function isEnrollmentQuickWin(enrollment: CourseEnrollment): boolean {
+  return enrollment.status === 'in_progress'
+    && enrollment.lessons.filter((lesson) => !lesson.completed).length === 1;
+}
+
+/** Only in-progress enrollments reach this mapper after the service filters them. */
+function toCourseProgress(enrollment: CourseEnrollment, now: Date): CourseProgress {
   return {
     courseId: enrollment.courseId,
     title: enrollment.title,
     completionPercentage: computeCompletionPercentage(enrollment),
     lastActivityAt: enrollment.lastActivityAt,
     status: 'in_progress',
+    isStale: isEnrollmentStale(enrollment.lastActivityAt, now),
+    isQuickWin: isEnrollmentQuickWin(enrollment),
   };
 }
