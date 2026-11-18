@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { fetchProgress } from '../../api';
 import { CourseProgress } from '../../types';
 import { CourseList, CoursesSectionHeader, Filter, Intro } from './components';
+import { trackProgressViewed } from '../../utils/analytics';
 
 //TODO extract button into reusable ui component
 
@@ -36,7 +37,10 @@ const HomePage = (): React.JSX.Element => {
       setServerState({ status: 'loading' });
       try {
         const courses = await fetchProgress(learnerId, minCompletion, controller.signal);
-        if (!controller.signal.aborted) setServerState({ status: 'success', courses });
+        if (!controller.signal.aborted) {
+          setServerState({ status: 'success', courses });
+          trackProgressViewed(learnerId, minCompletion, courses.length);
+        }
       } catch (error: unknown) {
         if (!controller.signal.aborted) {
           const message =

@@ -1,5 +1,7 @@
+/* TODO refactor styling in component scoped stylesheets, extracting variables, consider using scss  */
+
 :root {
-  font-family: "Segoe UI", system-ui, sans-serif;
+  font-family: 'Segoe UI', system-ui, sans-serif;
   color: #292620;
   background: #f6f4ef;
   font-synthesis: none;
@@ -16,11 +18,13 @@ body {
   min-width: 320px;
 }
 
-button, select {
+button,
+select {
   font: inherit;
 }
 
-button, select {
+button,
+select {
   -webkit-tap-highlight-color: transparent;
 }
 
@@ -33,7 +37,8 @@ button:disabled {
   opacity: 0.55;
 }
 
-button:focus-visible, select:focus-visible {
+button:focus-visible,
+select:focus-visible {
   outline: 3px solid #a24224;
   outline-offset: 4px;
 }
@@ -439,7 +444,9 @@ progress::-moz-progress-bar {
 }
 
 @media (prefers-reduced-motion: reduce) {
-  *, *::before, *::after {
+  *,
+  *::before,
+  *::after {
     animation: none !important;
     transition: none !important;
   }
