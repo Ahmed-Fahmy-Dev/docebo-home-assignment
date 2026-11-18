@@ -1,6 +1,6 @@
 # Product Notes
 
-Backend implementation is complete. Frontend improvements, analytics, and final product metrics remain to be reviewed and implemented.
+The backend and frontend progress flow are implemented. Analytics and the final success metric remain pending.
 
 ## User problem
 
@@ -12,7 +12,8 @@ Learners taking multiple courses lose track of their progress and most recent ac
 - Implemented extra rules: optional minimum-completion filtering and a quick-win flag for courses with one unfinished lesson.
 - Implemented validation and readable error responses, with original contract tests and additional boundary tests.
 - Verified all 23 backend tests (eight original plus 15 focused additions), TypeScript compilation, and compiled-server startup with real health/progress/filter/error requests; the temporary server was stopped afterward.
-- Frontend: existing React starter remains in place; only its response type has been aligned with the API. Loading/error/empty states and analytics are still pending.
+- Frontend: extended the React starter with demo learner selection, minimum-completion filtering, result counts, accessible progress bars, formatted activity dates, and inactive/quick-win badges. Includes loading, error/retry, distinct empty states, Refresh, and Clear filter.
+- Initial browser checks passed, including obsolete-request cancellation, error recovery, keyboard access, contrast, and mobile layouts. The refactored frontend passes TypeScript checks and the Vite production build with Strict Mode enabled.
 
 ## Extra business rule
 
@@ -39,7 +40,7 @@ Compliance for learner 1 and Workplace Safety for learner 2 qualify in the exist
 
 ## Success metric
 
-Pending frontend and analytics planning: choose one learner re-engagement metric, its measurement approach, and a first-30-days target. No analytics or outcome measurement is implemented in the backend at this stage.
+Pending analytics planning: choose one learner re-engagement metric, its measurement approach, and a first-30-days target. No analytics event or outcome measurement is implemented yet.
 
 ## Assumptions
 
@@ -47,11 +48,14 @@ Pending frontend and analytics planning: choose one learner re-engagement metric
 - **Ignore rules:** Maintain one root `.gitignore` for dependencies, build output, coverage, local `.env` files, logs, and `.DS_Store` metadata across both applications. Keep package manifests and lockfiles under version control.
 - **Persistence:** Keep the supplied in-memory seed data unchanged. Requests derive new response objects and do not mutate enrollment records or their ordering. Empty-state edge records are isolated test fixtures.
 - **Authentication:** Retain the fictional identity header without adding authorization. It is client-controlled and not a verified identity. Real authentication would establish identity first, and learner authorization would run before retrieving data; mismatches would receive `403`.
+- **Demo identity:** The frontend selects learner 1 or 2, defaulting to learner 1. This dropdown is a demonstration control, not a login or authorization mechanism.
+- **Frontend filtering:** Offer Any, 25%, 50%, 75%, and 100% minimum completion. Preserve the selection when switching learners; Clear filter restores Any. Filtering and sorting remain authoritative in the backend.
+- **Frontend states and dates:** Clear obsolete results while loading and cancel superseded requests. Show separate empty messages for no active courses and no filter matches. Preserve UTC timestamps from the API and display local dates/times with timezone labels.
 - **Completion:** Lessons have equal weight. Round completed/total lessons to a whole percentage; no lessons yields 0. Enrollment status determines inclusion, even for inconsistent records; no 99% cap is applied.
 - **Activity time:** Preserve ISO-8601 seed timestamps and calculate elapsed time in milliseconds. Stale means strictly more than 30 24-hour days; exactly 30 days and future activity are not stale. Capture one reference time for each response.
 - **Input validation:** Learner IDs use positive decimal safe integers. `minCompletion` accepts a single whole-number decimal value from 0 to 100. Leading zeros are accepted; signs, fractions, scientific/hexadecimal notation, and structured/repeated filter values are rejected.
 - **API contract:** Preserve `{ learnerId, courses }`, add explicit boolean flags, return empty arrays for known learners without matching courses, and keep unknown learners as `404` even when a valid filter is present.
-- **Analytics:** Deferred to frontend work so the event represents a successful view or meaningful user action rather than merely receiving an API request.
+- **Analytics:** Deferred by explicit scope choice. The required learning-related event remains a separate implementation step.
 
 ## What I'd build next
 
