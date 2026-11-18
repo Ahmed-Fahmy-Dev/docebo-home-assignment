@@ -9,3 +9,7 @@ coverage/
 
 # macOS metadata
 .DS_Store
+
+## markdown files
+SPEC.md
+oringinal-README.md

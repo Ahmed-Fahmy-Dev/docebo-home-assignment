@@ -1,6 +1,6 @@
 # Product Notes
 
-The backend and frontend progress flow are implemented. Analytics and the final success metric remain pending.
+The progress flow and lightweight analytics are implemented.
 
 ## User problem
 
@@ -40,7 +40,11 @@ Compliance for learner 1 and Workplace Safety for learner 2 qualify in the exist
 
 ## Success metric
 
-Pending analytics planning: choose one learner re-engagement metric, its measurement approach, and a first-30-days target. No analytics event or outcome measurement is implemented yet.
+- **Metric:** Seven-day course re-engagement rate: the percentage of learners with an in-progress course who record new course activity within seven days of pilot assignment.
+- **Measurement:** Compare a randomly assigned group offered the progress view with a control group using the existing experience, using real LMS activity records.
+- **First 30 days:** Target a 10% relative improvement over the control group, for example 40% to 44%. This is a hypothesis, not a measured result.
+
+The demo's console events verify instrumentation; measuring this outcome requires persistent pilot-assignment and course-activity data.
 
 ## Assumptions
 
@@ -55,8 +59,10 @@ Pending analytics planning: choose one learner re-engagement metric, its measure
 - **Activity time:** Preserve ISO-8601 seed timestamps and calculate elapsed time in milliseconds. Stale means strictly more than 30 24-hour days; exactly 30 days and future activity are not stale. Capture one reference time for each response.
 - **Input validation:** Learner IDs use positive decimal safe integers. `minCompletion` accepts a single whole-number decimal value from 0 to 100. Leading zeros are accepted; signs, fractions, scientific/hexadecimal notation, and structured/repeated filter values are rejected.
 - **API contract:** Preserve `{ learnerId, courses }`, add explicit boolean flags, return empty arrays for known learners without matching courses, and keep unknown learners as `404` even when a valid filter is present.
-- **Analytics:** Deferred by explicit scope choice. The required learning-related event remains a separate implementation step.
+- **Analytics:** Log `course_progress_viewed` as structured JSON after each successful, non-cancelled load, including empty results, learner/filter changes, Refresh, and successful Retry. Fields are `learnerId`, `minCompletion`, filtered `courseCount`, and a UTC ISO `timestamp`. Failed, malformed, and cancelled requests emit no event. Inspect it in the browser's developer console by filtering for `course_progress_viewed`. Logs stay in the console; no external service or persistence is used.
 
 ## What I'd build next
 
-Pending final product review after the frontend and analytics are complete.
+- Connect verified learner identity and real course progress, enforcing learner authorization before returning data.
+- Persist analytics and correlate pilot assignment with LMS activity to measure re-engagement.
+- Start a small learner pilot to assess whether completion filters and quick-win labels help people choose a course to resume.
