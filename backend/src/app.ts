@@ -55,7 +55,21 @@ export function createApp() {
       return;
     }
 
-    //TODO recognize different client errors and return proper status codes and messages
+    // Express can reject malformed input before the route's validation runs.
+    if (err instanceof URIError && 'status' in err && err.status === 400) {
+      res.status(400).json({ error: 'Invalid URL encoding' });
+      return;
+    }
+
+    if (
+      err instanceof SyntaxError
+      && 'status' in err && err.status === 400
+      && 'type' in err && err.type === 'entity.parse.failed'
+    ) {
+      res.status(400).json({ error: 'Invalid JSON body' });
+      return;
+    }
+
     console.error(err);
     res.status(500).json({ error: 'Internal server error' });
   });

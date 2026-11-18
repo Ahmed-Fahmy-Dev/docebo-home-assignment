@@ -17,18 +17,18 @@ OpenAI Codex in VS Code, including one review subagent without the chat history.
 - **Scope:** Chose one root repository, React, a demo learner dropdown, and minimal console analytics. Rejected estimated remaining minutes because the seed data has no duration information; selected minimum-completion filtering and quick-win flags instead.
 - **Backend arguments:** Rejected an options object for the single `minCompletion` argument; used a primitive number and deferred extensibility until needed.
 - **Learner-ID parsing:** Challenged changing `string | string[]` to `unknown` and adding dense validation. Restored the original union and clearer guards while retaining decimal-format and safe-integer checks.
-- **Test scope:** Rejected the expanded 62-test suite. Kept 23 tests: the original eight unchanged plus 15 focused additions for the extra rules and meaningful boundaries; removed repetitive variants and unchanged-infrastructure tests.
+- **Test scope:** Reduced the initial 62-test suite to 23: the original eight unchanged plus 15 focused additions; removed repetitive variants and unchanged-infrastructure tests. Later approved three regression tests for the confirmed error-handling fix.
 - **Frontend structure:** Substantially reorganized layout, page, list, section-header components, and date formatting. Initiated the shared controlled dropdown and external options constants; requested AI reviews of component boundaries, narrow props, and parent wiring.
 - **Request handling:** Requested `async`/`await` with `try`/`catch` instead of promise chaining. Challenged duplicated loading updates in handlers; moved loading, success, and error transitions into the fetch effect so handlers only change inputs or trigger refresh.
 - **Validation and verification:** Questioned runtime response validation, retained the guard, and destructured fields for readability. Enabled Strict Mode and kept browser validation without adding a frontend testing framework.
-- **Documentation and review:** Requested shorter security findings and simpler README/product/AI notes without duplication. Requested an independent review; deferred optional test additions and refactors, documenting the frontend testing tradeoff in `PRODUCT.md`.
+- **Documentation and review:** Requested shorter security findings and simpler README/product/AI notes without duplication. Requested an independent review; deferred optional tests/refactors but approved AI fixing the confirmed malformed-request bug. Documented the frontend testing tradeoff in `PRODUCT.md`.
 
 ## Verification
 
-- **Backend:** Original baseline was four passing and four failing tests. All 23 final tests and the TypeScript build pass. Compiled startup was checked with real health, progress, filter, and error requests; the temporary server was stopped.
+- **Backend:** Original baseline was four passing and four failing tests. All 26 tests and the backend typecheck pass. The three new tests reproduced both malformed-request failures before the fix and verify readable `400` responses while unexpected server syntax errors remain opaque `500`s. Previously verified the TypeScript build and compiled startup with real health, progress, filter, and error requests; the temporary server was stopped.
 - **Frontend:** Initial browser checks covered filters, request cancellation, error recovery, keyboard access, contrast, and mobile layouts. The refactored frontend passes TypeScript checks and the Vite production build with Strict Mode enabled.
 - **Analytics:** Browser checks covered event counts, Strict Mode, and suppression on failed/cancelled requests.
-- **Independent review:** The subagent checked frontend/backend code against the spec, reran tests and typechecks, and reproduced the API error-classification limitation recorded in `PRODUCT.md`. It made no file changes and did not repeat browser checks.
+- **Independent review:** The subagent checked frontend/backend code against the spec, reran tests and typechecks, and identified the subsequently fixed API error-classification bug. It made no file changes and did not repeat browser checks.
 
 ## What you'd do differently without AI
 

@@ -35,8 +35,6 @@ Tests cover zero, one, and multiple unfinished lessons, empty courses, and the A
 | Exhaustive backend input variants | Focus tests on the contract, extra rules, and meaningful boundaries. |
 | Automated frontend regression tests | Used browser validation; future tests would cover request cancellation, retry, and malformed responses. |
 
-Known API limitation: malformed URL encoding or JSON currently returns a generic `500` instead of `400`; this remains an error-handling fix.
-
 ## Analytics
 
 Log `course_progress_viewed` as console JSON after each successful, non-cancelled load, including empty results, filter/learner changes, Refresh, and successful Retry. Fields: `learnerId`, `minCompletion`, filtered `courseCount`, and UTC `timestamp`. Failed or malformed responses emit no event. Inspect it in the browser console; events are not persisted.
@@ -55,7 +53,7 @@ Console events verify instrumentation; measuring re-engagement requires persiste
 - **Identity and trust:** The demo selects learner 1 or 2, defaulting to 1. Neither the dropdown nor the fictional identity header authenticates users. Authorization is intentionally unenforced; real verified identity would be checked before fetching progress, with mismatches returning `403`.
 - **Completion:** Equally weighted lessons; round completed/total to a whole percentage; no lessons means 0%. Enrollment status determines inclusion, even if a record's lessons imply 100% completion.
 - **Time:** API timestamps remain UTC; the UI displays local time with a timezone label. Inactive means strictly more than 30 elapsed 24-hour days; exactly 30 days and future activity are not stale.
-- **API:** Preserve `{ learnerId, courses }`, adding boolean flags and the optional filter. Known learners with no matches receive an empty list; unknown learners receive `404`. Filtering and sorting remain in the backend.
+- **API:** Preserve `{ learnerId, courses }`, adding boolean flags and the optional filter. Known learners with no matches receive an empty list; unknown learners receive `404`. Malformed URL encoding and JSON return readable `400` errors; unexpected failures retain a generic `500`. Filtering and sorting remain in the backend.
 - **Validation:** Positive decimal safe-integer learner IDs and one integer filter value from 0 to 100. Leading zeros are accepted; signs, fractions, alternate numeric formats, and repeated/structured filters are rejected.
 - **Requests:** Clear old results while loading and cancel superseded requests so outdated responses cannot replace the current selection.
 

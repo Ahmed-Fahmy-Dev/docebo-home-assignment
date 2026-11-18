@@ -32,6 +32,8 @@ From the repository root:
 npm --prefix backend test -- --runInBand
 ```
 
+The 26-test suite covers the API contract, extra business rules, malformed requests, and server-error responses.
+
 ## Supporting documentation
 
 - [PRODUCT.md](PRODUCT.md): problem, scope, business rules, cuts, success metric, and assumptions.
