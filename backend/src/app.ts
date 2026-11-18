@@ -3,6 +3,11 @@ import cors from 'cors';
 import { AppError } from './errors';
 import { progressRouter } from './routes/progressRoutes';
 
+//TODO extract routes into routing file
+//TODO extract error middleware into own file
+//TODO create server loader file where all middleware, CORS, rate limitir, routes and error handling are loaded
+//TODO streamline app file into initiating the server only and connecting to external Data sources
+
 declare module 'express-serve-static-core' {
   interface Request {
     /**
@@ -50,6 +55,7 @@ export function createApp() {
       return;
     }
 
+    //TODO recognize different client errors and return proper status codes and messages
     console.error(err);
     res.status(500).json({ error: 'Internal server error' });
   });

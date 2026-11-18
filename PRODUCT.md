@@ -1,65 +1,63 @@
 # Product Notes
 
-The progress flow and lightweight analytics are implemented.
-
 ## User problem
 
-Learners taking multiple courses lose track of their progress and most recent activity. A single progress list should help them reconnect with unfinished learning and identify a manageable course to complete.
+Learners taking multiple courses lose track of where they left off. A single progress view should help them choose a course to resume.
 
 ## MVP scope
 
-- Implemented backend: list a learner's in-progress courses with rounded completion percentages, last activity, stale flags, and newest-first sorting.
-- Implemented extra rules: optional minimum-completion filtering and a quick-win flag for courses with one unfinished lesson.
-- Implemented validation and readable error responses, with original contract tests and additional boundary tests.
-- Verified all 23 backend tests (eight original plus 15 focused additions), TypeScript compilation, and compiled-server startup with real health/progress/filter/error requests; the temporary server was stopped afterward.
-- Frontend: extended the React starter with demo learner selection, minimum-completion filtering, result counts, accessible progress bars, formatted activity dates, and inactive/quick-win badges. Includes loading, error/retry, distinct empty states, Refresh, and Clear filter.
-- Initial browser checks passed, including obsolete-request cancellation, error recovery, keyboard access, contrast, and mobile layouts. The refactored frontend passes TypeScript checks and the Vite production build with Strict Mode enabled.
+- React UI backed by Express: in-progress courses, completion percentages, last activity, inactive badges, and newest-first ordering.
+- Demo learner selection, minimum-completion filtering, quick-win badges, and result counts.
+- Loading, error/retry, and separate empty states for no active courses versus no filter matches; Refresh and Clear filter controls.
+- Responsive layout, labelled controls, and accessible progress bars.
 
-## Extra business rule
+## Extra business rules
 
 ### Minimum completion
 
-`minCompletion` optionally limits the list to courses with at least the requested displayed completion percentage. This helps learners focus on courses where they have already made progress. It accepts whole-number percentages from 0 through 100, includes courses exactly at the threshold, and compares against the same rounded percentage shown in the response. A valid filter with no matches returns an empty list, and newest-first sorting remains unchanged.
+`minCompletion` keeps courses at or above the requested **rounded, displayed percentage**, helping learners focus on existing progress. The API accepts integers from 0 to 100; the UI offers Any, 25%, 50%, 75%, and 100%. The filter persists when switching learners; Clear filter restores Any.
 
-For learner 1, `minCompletion=50` retains Onboarding and Compliance. Focused tests verify inclusive thresholds, rounding, 0/100 boundaries, empty results, and representative out-of-range and repeated query values. The original tests retain learner-isolation coverage.
+Tests cover inclusive thresholds, rounding, 0/100 boundaries, no matches, and invalid or repeated filter values.
 
 ### Quick wins
 
-`isQuickWin` identifies an in-progress course with exactly one unfinished lesson. It helps learners spot an opportunity to finish a course without inventing time estimates. A one-lesson in-progress course with its lesson unfinished qualifies; empty courses and courses with zero or multiple unfinished lessons do not. The flag neither filters courses nor changes their order.
+`isQuickWin` flags an in-progress course with **exactly one unfinished lesson**, helping learners identify a course close to completion. It does not change ordering or filtering. Lesson duration and difficulty are unknown, so this is not a promise of low effort.
 
-Compliance for learner 1 and Workplace Safety for learner 2 qualify in the existing seed data. Tests verify zero/one/multiple unfinished-lesson counts and API flags. Lesson difficulty and duration are unknown, so a quick win means one lesson remaining, not a promise of low effort.
+Tests cover zero, one, and multiple unfinished lessons, empty courses, and the API flags.
 
-## What I intentionally cut
+## Cuts and limitations
 
 | Cut | Why |
 | --- | --- |
-| Estimated remaining minutes | Seed data has no duration information; avoid unsupported estimates or invented data. |
-| Database and write endpoints | Existing in-memory records support the required read/list flow and both extra rules. |
-| Production authentication | The assignment explicitly allows an identity stub; retain and document the trust boundary. |
-| Exhaustive input variants and tests of unchanged infrastructure | Keep additional tests focused on the extra rules and meaningful boundaries within the assignment's time budget. |
+| Database, write endpoints, and a course player | The supplied in-memory data supports the required progress-list flow. |
+| Production authentication | The assignment permits an identity stub; see the trust boundary below. |
+| Estimated remaining minutes | No duration data supports a credible estimate. |
+| Exhaustive backend input variants | Focus tests on the contract, extra rules, and meaningful boundaries. |
+| Automated frontend regression tests | Used browser validation; future tests would cover request cancellation, retry, and malformed responses. |
+
+Known API limitation: malformed URL encoding or JSON currently returns a generic `500` instead of `400`; this remains an error-handling fix.
+
+## Analytics
+
+Log `course_progress_viewed` as console JSON after each successful, non-cancelled load, including empty results, filter/learner changes, Refresh, and successful Retry. Fields: `learnerId`, `minCompletion`, filtered `courseCount`, and UTC `timestamp`. Failed or malformed responses emit no event. Inspect it in the browser console; events are not persisted.
 
 ## Success metric
 
-- **Metric:** Seven-day course re-engagement rate: the percentage of learners with an in-progress course who record new course activity within seven days of pilot assignment.
-- **Measurement:** Compare a randomly assigned group offered the progress view with a control group using the existing experience, using real LMS activity records.
-- **First 30 days:** Target a 10% relative improvement over the control group, for example 40% to 44%. This is a hypothesis, not a measured result.
+- **Metric:** Seven-day re-engagement rate: the percentage of learners with an in-progress course who record new course activity within seven days of pilot assignment.
+- **Measurement:** Randomly offer the view to one group; compare re-engagement with a control group using the existing experience and real LMS activity records.
+- **First 30-day target:** 10% relative improvement, for example 40% to 44%. This is a hypothesis, not a measured result.
 
-The demo's console events verify instrumentation; measuring this outcome requires persistent pilot-assignment and course-activity data.
+Console events verify instrumentation; measuring re-engagement requires persistent pilot-assignment and course-activity data.
 
 ## Assumptions
 
-- **Repository organization:** Keep the Express backend, React frontend, and assignment documentation in one Git repository at the project root. This provides one submission and keeps related frontend/backend changes together.
-- **Ignore rules:** Maintain one root `.gitignore` for dependencies, build output, coverage, local `.env` files, logs, and `.DS_Store` metadata across both applications. Keep package manifests and lockfiles under version control.
-- **Persistence:** Keep the supplied in-memory seed data unchanged. Requests derive new response objects and do not mutate enrollment records or their ordering. Empty-state edge records are isolated test fixtures.
-- **Authentication:** Retain the fictional identity header without adding authorization. It is client-controlled and not a verified identity. Real authentication would establish identity first, and learner authorization would run before retrieving data; mismatches would receive `403`.
-- **Demo identity:** The frontend selects learner 1 or 2, defaulting to learner 1. This dropdown is a demonstration control, not a login or authorization mechanism.
-- **Frontend filtering:** Offer Any, 25%, 50%, 75%, and 100% minimum completion. Preserve the selection when switching learners; Clear filter restores Any. Filtering and sorting remain authoritative in the backend.
-- **Frontend states and dates:** Clear obsolete results while loading and cancel superseded requests. Show separate empty messages for no active courses and no filter matches. Preserve UTC timestamps from the API and display local dates/times with timezone labels.
-- **Completion:** Lessons have equal weight. Round completed/total lessons to a whole percentage; no lessons yields 0. Enrollment status determines inclusion, even for inconsistent records; no 99% cap is applied.
-- **Activity time:** Preserve ISO-8601 seed timestamps and calculate elapsed time in milliseconds. Stale means strictly more than 30 24-hour days; exactly 30 days and future activity are not stale. Capture one reference time for each response.
-- **Input validation:** Learner IDs use positive decimal safe integers. `minCompletion` accepts a single whole-number decimal value from 0 to 100. Leading zeros are accepted; signs, fractions, scientific/hexadecimal notation, and structured/repeated filter values are rejected.
-- **API contract:** Preserve `{ learnerId, courses }`, add explicit boolean flags, return empty arrays for known learners without matching courses, and keep unknown learners as `404` even when a valid filter is present.
-- **Analytics:** Log `course_progress_viewed` as structured JSON after each successful, non-cancelled load, including empty results, learner/filter changes, Refresh, and successful Retry. Fields are `learnerId`, `minCompletion`, filtered `courseCount`, and a UTC ISO `timestamp`. Failed, malformed, and cancelled requests emit no event. Inspect it in the browser's developer console by filtering for `course_progress_viewed`. Logs stay in the console; no external service or persistence is used.
+- **Persistence:** Unchanged in-memory seed data; requests do not mutate enrollments.
+- **Identity and trust:** The demo selects learner 1 or 2, defaulting to 1. Neither the dropdown nor the fictional identity header authenticates users. Authorization is intentionally unenforced; real verified identity would be checked before fetching progress, with mismatches returning `403`.
+- **Completion:** Equally weighted lessons; round completed/total to a whole percentage; no lessons means 0%. Enrollment status determines inclusion, even if a record's lessons imply 100% completion.
+- **Time:** API timestamps remain UTC; the UI displays local time with a timezone label. Inactive means strictly more than 30 elapsed 24-hour days; exactly 30 days and future activity are not stale.
+- **API:** Preserve `{ learnerId, courses }`, adding boolean flags and the optional filter. Known learners with no matches receive an empty list; unknown learners receive `404`. Filtering and sorting remain in the backend.
+- **Validation:** Positive decimal safe-integer learner IDs and one integer filter value from 0 to 100. Leading zeros are accepted; signs, fractions, alternate numeric formats, and repeated/structured filters are rejected.
+- **Requests:** Clear old results while loading and cancel superseded requests so outdated responses cannot replace the current selection.
 
 ## What I'd build next
 
